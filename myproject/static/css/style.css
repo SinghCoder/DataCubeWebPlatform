@@ -1,0 +1,131 @@
+body{
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-image: url('../images/homeBG.jpg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    height: 100vh;
+    width: 100vw;
+}
+.overlay{
+    height:100vh;
+    width:100vw;
+    background-color: black;
+    opacity: .5;
+}
+#tester{
+    width: 45vw;
+    height: 60vh;
+    z-index: 10;
+    position: absolute;
+    top: 30vh;
+    left: 50vw;
+}
+#map{
+    width: 45vw;
+    height: 60vh;
+    z-index: 10;
+    position: absolute;
+    top: 30vh;
+    left: 2vw;
+    outline: none;
+}
+#indexDiv{
+    top: 0;
+    right: 5vw;
+    position: absolute;
+}
+
+.indexSelect{
+    /* color:white; */
+    font-size:20px;
+}
+
+#drawPlotBtn{
+    margin-left: 2vw;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------- */
+#indexInputField{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    
+    display: none;
+    z-index: 100;
+}
+
+#logoImg{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer !important;
+    z-index: 10101010;
+}
+
+#logoDiv{
+    position: absolute;
+    top: 2vh;
+    left: 2vw;
+    height: 10vh;
+    width: 10vh;
+}
+
+.styled-select {
+    background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+    height: 29px;
+    overflow: hidden;
+    width: 240px;
+ }
+ 
+ .styled-select select {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    height: 29px;
+    padding: 5px; /* If you add too much padding here, the options won't show in IE */
+    width: 268px;
+ }
+
+ .rounded {
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+ }
+ .blue    { background-color: #3b8ec2; }
+ .blue select    { color: #000; }
+ 
+
+ .logout {
+    background:url('https://dh3vbjnk0bnfa.cloudfront.net/static/centralauth/images/btn-login-hover.png') no-repeat 5px 5px #484B4F;
+     width: 100px;
+     cursor:pointer;
+     border-radius:50px;
+     padding:10px 20px 10px 0;
+     color:White;
+     font-size:14px;
+     text-align:left;
+     text-indent:40px;
+     display:block;
+     margin:0 auto;
+    
+     /* Animations: */
+     -webkit-transition-timing-function: ease-in-out;
+     -webkit-transition-duration: .4s;
+     -webkit-transition-property: all;
+     
+     -moz-transition-timing-function: ease-in-out;
+     -moz-transition-duration: .4s;
+     -moz-transition-property: all;
+   }
+   
+   .logout:hover {
+     background-image: url( 'https://dh3vbjnk0bnfa.cloudfront.net/static/centralauth/images/btn-login.png' );
+     background-position: 65px 5px;
+     text-indent: 15px;  
+   }

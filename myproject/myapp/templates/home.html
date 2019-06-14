@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% load static %}
+        <link rel="stylesheet" href="{% static '/leaflet/leaflet.css' %}"/>
+        <link rel="stylesheet" href="{% static '/css/style.css' %}"/>
+        <link rel="stylesheet" href="{% static '/css/calc.css' %}"/>
+        <link rel="stylesheet" href="{% static '/css/loader.css' %}"/>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.css">
+
+        <script src="{% static '/leaflet/leaflet.js' %}"></script>
+        <script src="{% static 'js/calc.js' %}"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/mathjs/5.10.3/math.js'></script>
+        <script src="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.min.js"></script>
+        <!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise"></script> -->
+        <!-- <script src="{% static 'js/leaflet-bing-layer.min.js' %}"></script> -->
+        <script src="{% static 'js/Bing.js' %}"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+        <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
+        <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
+        <script>
+            function CheckIndex(val){
+                console.log(val);
+                var element=document.getElementById('indexInputField');
+                if(val==='other'){
+                    element.style.display='block';
+                    document.getElementById('map').style.display='none';
+                    document.getElementById('tester').style.display='none';
+                }
+                else  
+                    element.style.display='none';
+                
+            }
+            function submitIndex(text){
+                console.log(text);
+                indexName = document.getElementById('indexNameInput').value;
+                indexFormula = text;
+                index = {'indexName':indexName,'indexFormula':indexFormula};
+                saveIndex(index);
+            }
+            function populateIndices(){
+                getIndices();
+                TESTER = document.getElementById('tester');
+                Plotly.plot( TESTER, [{
+                    y: [],
+                    x: []
+                }], {
+                margin: { t: 0 } } );
+            }
+            function closeIndexDiv(){
+                document.getElementById('indexInputField').style.display = 'none';
+                $('select.indexSelect').val('NDVI');
+            }
+        </script>
+    </head>
+    <body onload='populateIndices();'>
+        <div class='overlay'></div>
+        <div id='logoDiv'>
+            <a href='/myapp/home/'><img src="{% static '/images/isroLogo.png' %}" id='logoImg'></a>
+        </div>
+        <!-- Container to hold the map -->
+        <div>
+            <div id = "map"></div>
+            <div id = "tester"></div>
+            <div id='loader'>
+                <div class="container">
+                    <div class="planet">
+                      <div class="spots">
+                        <div class="spot"></div>
+                        <div class="spot"></div>
+                        <div class="spot"></div>
+                        <span style="font-size: 20px;color:white;">Loading.... Please wait</span>
+                        <div class="spot"></div>
+                        <div class="spot"></div>
+                        <div class="spot"></div>
+                      </div>
+                    </div>
+                    <div class="orbit">
+                      <div class="satelite">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                        <div class="wings">
+                          <div class="wing"></div>
+                          <div class="wing"></div>
+                        </div>
+                        <div class="tail"></div>
+                        <div class="antena">
+                          <div class="waves">
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                          </div>
+                        </div>
+                    </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        <div id='logout' style='position: absolute;top:0;left:45vw;'>
+            <pre>
+                <a href='/logout/'><input type="button" value="Logout" class="logout"/></a>
+            </pre>
+        </div>
+        <div id="indexDiv">
+            <p style="color:white;font-size:20px;">Please select a index: </p>
+            <div class="styled-select blue rounded">
+                <select id="selectIndex" name='indexes' onchange="CheckIndex(this.value);" class='indexSelect'>
+                </select>
+            </div>
+        </div>
+
+        <div id="indexInputField" class="indexInput">
+            <form name="index-calc" style="left:35vw;position:absolute;top:35vh;color:white;opacity: ,6">
+                Index Name:  <input type='text' name='indexName' id='indexNameInput'>
+                    <table class="calculator" cellspacing="0" cellpadding="1">
+                   <tr>
+                     <td colspan="5"><input id="display" name="display" value="enter" size="28" maxlength="20"></td>
+                   </tr>
+                
+                
+                   <tr>
+                     <td><input type="button" class="btnTop" name="btnTop" value="CLR" onclick="this.form.display.value=  '' "></td>
+                     <td><input type="button" class="btnTop" name="btnTop" value="DEL" onclick="deleteChar(this.form.display)"></td>
+                   <td><input type="button" class="btnTop" name="btnTop" value="GO" onclick="submitIndex(this.form.display.value)">
+                     </td>
+                   </tr>
+                
+                
+                   <tr>
+                     <td><input type="button" class="btnCol" name="btnCol" value="BLUE" onclick="addChar(this.form.display, 'b')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="GRN" onclick="addChar(this.form.display, 'g')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR1" onclick="addChar(this.form.display, 'swir1')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR2" onclick="addChar(this.form.display, 'swir2')"></td>
+                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="ceil" onclick=" ceil(this.form.display) "></td>
+                   </tr>
+                
+                   <tr>
+                     <td><input type="button" class="btnCol" name="btnCol" value="NIR" onclick="addChar(this.form.display, 'nir')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="RED" onclick="addChar(this.form.display, 'r')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar(this.form.display, 'any')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar(this.form.display, 'any')"></td>
+                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="floor" onclick=" floor(this.form.display) "></td>
+                   </tr>
+                
+                   <tr>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="e&#94;" onclick=" exp(this.form.display) "></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="/" onclick="addChar(this.form.display, '/')"></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="%" onclick=" percent(this.form.display)"></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="log" onclick=" log(this.form.display) "></td>
+                     <td><input type="button" class="btnMathl1" name="btnMathl1" value="*" onclick="addChar(this.form.display, '*')"></td>
+                   </tr>
+                
+                
+                   <tr>
+                     
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="&radic;" onclick="sqrt(this.form.display) "></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="-" onclick="addChar(this.form.display, '-')"></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="+" onclick="addChar(this.form.display, '+')"></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="x&#94;" onclick=" power(this.form,display) "></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="PI" onclick=" pi(this.form.display) "></td>
+                   </tr>
+                
+                
+                   
+                   <tr>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="(" onclick="addChar(this.form.display, '(')"></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value=")" onclick="addChar(this.form.display,')')"></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="cos" onclick=" cos(this.form.display) "></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="sin" onclick=" sin(this.form.display) "></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="tan" onclick=" tan(this.form.display) "></td>
+                  </tr>
+                
+                
+                
+                 </tabel>
+                </form>	
+        </div>
+    </body>
+    <script src="{% static 'js/script.js' %}"></script>
+</html>
