@@ -1,2 +1,5 @@
 IIRS Internship Project
 Aim: Implementing Open Data Cube to store the satellite data of a region and use it to calculate various indices and plot the time series variation.
+Done So Far: Made a web platform with login/signup and feature to add customised indices. 
+             Also platform enables to plot terrain profile of a region by selecting the points.
+Group Member: Kavya Gupta
