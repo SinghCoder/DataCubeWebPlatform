@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 /**
  * This function is used to get cookie so that csrf token can be set while sending request to backend
+ * Already avaiable on net, just copy paste
  * @param {string} name - Name to get cookie by name
  * @returns {string} cookieValue - Value of cookie corresponding to name
  */
@@ -22,6 +23,51 @@ function getCookie(name) {
         })();        
     }
     return cookieValue;
+}
+
+/**
+ * This function is what plots the graph using plotly js
+ * @param {string} graphTitle 
+ * @param {string} xTitle 
+ * @param {string} yTitle 
+ * @param {Array} xArr 
+ * @param {Array} yArr 
+ * @param {string} plotName 
+ * @param {boolean} multipleAllowed - whether or not multiple plots allowed on one graph
+ */
+function plotGraph(graphTitle,xTitle,yTitle,xArr,yArr,plotName,multipleAllowed = false){
+    let e = document.getElementById("selectIndex");
+            let layout = {
+                title: {
+                  text:graphTitle,
+                  font: {
+                    family: "Courier New, monospace",size: 24
+                  }
+                },
+                xaxis: {
+                  title: {
+                    text: xTitle,
+                    font: {
+                      family: "Courier New, monospace",size: 18,color: "#7f7f7f"
+                    }
+                  },
+                },
+                yaxis: {
+                  title: {
+                    text: yTitle,
+                    font: {
+                      family: "Courier New, monospace",size: 18,color: "#7f7f7f"
+                    }
+                  }
+                }
+              };
+            TESTER = document.getElementById("tester");
+                // Plotly.purge(TESTER);
+                let plottingFunction = (multipleAllowed == true) ? 'plot' : 'newPlot';
+                Plotly[plottingFunction]( TESTER, [{
+                x: xArr,
+                y: yArr,
+                name : plotName}],layout);            
 }
 
 /**
@@ -61,18 +107,28 @@ function sendRequest(url,type,data){
 }
 
 /**
- * 
+ * This function is called whenever user clicks on map at a location
+ * It retrieves latitude and longitude values from leaflet and sends to backend
+ * Backend inturn sends back time series pixel values of all available bands as
+ * a dictionary of 3d arrays for that location.
+ * This is inturn passed to plotly.js to plot graph of index user has currently selected in drop down list
  * @param {object} latlng - dictionary corresponding to latitude longitude of location clicked
  */
 
 function latlonToBackend(latlng){
-    console.log(latlng.lat);
-    console.log(latlng.lng);
-
+    // console.log(latlng.lat);
+    // console.log(latlng.lng);
     sendRequest("/myapp/getUTM/","POST",latlng)
 	.then(function (response) {
+        response = JSON.parse(response);
+        console.log(response['error']);
+        if(response['error'] == 'Empty Dataset'){
+            // console.log('oyeeeeeeeeee');
+            document.getElementById("loader").style.display="none";
+            swal("Error", "Data not available for this point! Try another point..", "error");
+            return;
+        }
         console.log("Success!",response);
-            response = JSON.parse(response);
             let Arr3d={
                 "red": response.red,
                 "blue": response.blue,
@@ -80,7 +136,6 @@ function latlonToBackend(latlng){
                 "nir": response.nir,
                 "swir1": response.swir1,
                 "swir2": response.swir2,
-
             };
             let Arr1d = {
                 "red":[],
@@ -100,9 +155,9 @@ function latlonToBackend(latlng){
                     }
                 }
             }
-            console.log(Arr1d);
-            let time = response.time;
-            console.log(time);
+            // console.log(Arr1d);
+            let time = response.time;   //time's 1d array
+            // console.log(time);
             drawGraph(Arr1d,time);
         })        
 	.catch(function (error) {
@@ -173,45 +228,10 @@ map.on("pm:drawend", (e) => {
             }
             console.log(xArr);
             console.log(yArr);
-            TESTER = document.getElementById("tester");
-            let layout = {
-                title: {
-                  text:"Elevation Profile",
-                  font: {
-                    family: "Courier New, monospace",
-                    size: 24
-                  },
-                  xref: "paper",
-                  x: 0.05,
-                },
-                xaxis: {
-                  title: {
-                    text: "Distance (in km)",
-                    font: {
-                      family: "Courier New, monospace",
-                      size: 18,
-                      color: "#7f7f7f"
-                    }
-                  },
-                },
-                yaxis: {
-                  title: {
-                    text: "Elevation (in meters)",
-                    font: {
-                      family: "Courier New, monospace",
-                      size: 18,
-                      color: "#7f7f7f"
-                    }
-                  }
-                }
-              };
-                Plotly.purge(TESTER);
-                Plotly.plot( TESTER, [{
-                y: yArr,
-                x: xArr,
-                }], layout );
-            console.log(distElevationArray);
+            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,yArr,'');
+            // console.log(distElevationArray);
             document.getElementById("loader").style.display="none";
+            swal("Success", "Elevation Profile is drawn... Click Slide Out to see the graph", "success");
         }).catch(
             (e)=>{
                 console.log("Error ",e);
@@ -222,6 +242,15 @@ map.on("pm:drawend", (e) => {
     }
 });
 
+/**
+ * This function takes input pixel values time series data for all years corresponding to that location and 
+ * process the indexFormula corresponding to selected Index using Math.js math.compile()
+ * and .eval() function, compile() compiles formula and eval() evaluates it.It then passes these values to plotly js to plot
+ * a graph
+ * @param {Object} Arr1d - dictionary containing 1d arrays of pixel values for all the bands
+ * @param {Array<string>} timeArr - 1d array containing time values as strings in format {YYYY-MM-DD}
+ */
+
 function drawGraph(Arr1d,timeArr){
     let e = document.getElementById("selectIndex");
     let indexName = e.options[e.selectedIndex].text;
@@ -230,11 +259,11 @@ function drawGraph(Arr1d,timeArr){
     sendRequest(url,"POST",data)
     .then(function (response) {
             response = JSON.parse(response);
-            console.log(response);
+            // console.log(response);
             indexName = response.index.indexName;
             indexFormula = response.index.indexFormula;
-            console.log(indexFormula);
-            xArr = [];
+            // console.log(indexFormula);
+            yArr = [];
             for(let i=0; i<Arr1d.red.length; i+=1){
                 r = Arr1d.red[i];
                 g = Arr1d.green[i];
@@ -252,58 +281,30 @@ function drawGraph(Arr1d,timeArr){
                 });
                 console.log("[r,g,b,nir,swir1,swir2] = ",[r,g,b,nir,swir1,swir2]);
                 if(isNaN(ans)){
-                    console.log("shit");
                     timeArr.splice(i,1);
                     continue;
                 }
                 console.log("[eval result] = ",ans);
-                xArr.push(ans);
+                yArr.push(ans);
             }
-            console.log("xArr is : ",xArr);
-            let e = document.getElementById("selectIndex");
-            let layout = {
-                title: {
-                  text:"Index Plot",
-                  font: {
-                    family: "Courier New, monospace",
-                    size: 24
-                  },
-                  xref: "paper",
-                  x: 0.05,
-                },
-                xaxis: {
-                  title: {
-                    text: "Time",
-                    font: {
-                      family: "Courier New, monospace",
-                      size: 18,
-                      color: "#7f7f7f"
-                    }
-                  },
-                },
-                yaxis: {
-                  title: {
-                    text: "Value",
-                    font: {
-                      family: "Courier New, monospace",
-                      size: 18,
-                      color: "#7f7f7f"
-                    }
-                  }
-                }
-              };
-            TESTER = document.getElementById("tester");
-                Plotly.purge(TESTER);
-                Plotly.plot( TESTER, [{
-                y: xArr,
-                x: timeArr,
-                name: e.options[e.selectedIndex].text}],layout);
+            // console.log("xArr is : ",xArr);
+            plotGraph(indexName+' Plot','Time','indexValue',timeArr,yArr,indexName,false);
             document.getElementById("loader").style.display="none";
+            swal("Success", "Graph is drawn... Click Slide Out to see the graph", "success");
         })
     .catch(function (error) {
-		console.log("Something went wrong", error);
+        console.log("Something went wrong", error);
+        document.getElementById("loader").style.display="none";
+        swal("Error", "Got an error"+e, "error");
     });
 }
+
+/**
+ * This function is called when user clicks on GO button on calculator while adding his/her own 
+ * customized index. It takes index name and formula and sends a request to backend to save it in 
+ * his user account.
+ * @param {string} index - index name and formula to be saved in database
+ */
 
 function saveIndex(index){
     console.log(index);
@@ -318,6 +319,11 @@ function saveIndex(index){
         }
     );
 }
+
+/**
+ * This function is used to query about indices available in particular user's account
+ * Takes from backend all indices available and populate the select field at top right of webpage
+ */
 
 function getIndices(){
     let url = "/myapp/getIndices";
@@ -348,7 +354,7 @@ function getIndices(){
            $("#selectIndex").append("<option value='other'>Add your own index</option>");
            document.getElementById("indexInputField").style.display = "none";
            document.getElementById("map").style.display = "block";
-           document.getElementById("tester").style.display = "block";
+        //    document.getElementById("tester").style.display = "block";
         }
     ).catch(
         function (error) {
