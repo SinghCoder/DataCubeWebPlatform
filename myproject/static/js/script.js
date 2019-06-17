@@ -1,5 +1,10 @@
 /*jshint esversion: 6 */
-function getCookie(name) {
+/**
+ * This function is used to get cookie so that csrf token can be set while sending request to backend
+ * @param {string} name - Name to get cookie by name
+ * @returns {string} cookieValue - Value of cookie corresponding to name
+ */
+function getCookie(name) {  
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
         let cookies = document.cookie.split(";");
@@ -18,6 +23,14 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+/**
+ * This function is used to send XML request to backend
+ * It uses Promises to send asynchronus requests 
+ * @param {string} url - url defined in urls.py to which request must be made
+ * @param {string} type - type of request {'POST' / 'GET'}
+ * @param {object} data - data to be sent to backend in case of POST request
+ */
 
 function sendRequest(url,type,data){
     let request = new XMLHttpRequest();
@@ -39,13 +52,18 @@ function sendRequest(url,type,data){
         };
         // Setup our HTTP request
 		request.open(type || "GET", url, true);
-        
+        // Add csrf token
         request.setRequestHeader("X-CSRFToken", csrftoken);
         // Send the request
         request.send(JSON.stringify(data));
     });
     
 }
+
+/**
+ * 
+ * @param {object} latlng - dictionary corresponding to latitude longitude of location clicked
+ */
 
 function latlonToBackend(latlng){
     console.log(latlng.lat);
@@ -151,7 +169,7 @@ map.on("pm:drawend", (e) => {
             for(let i of distElevationArray){
                 console.log(i);
                 xArr.push(i.distance);
-                yArr.push(i.height);
+                yArr.push(i.elevation);
             }
             console.log(xArr);
             console.log(yArr);
@@ -192,6 +210,7 @@ map.on("pm:drawend", (e) => {
                 y: yArr,
                 x: xArr,
                 }], layout );
+            console.log(distElevationArray);
             document.getElementById("loader").style.display="none";
         }).catch(
             (e)=>{

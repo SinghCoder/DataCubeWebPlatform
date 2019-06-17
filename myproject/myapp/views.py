@@ -4,6 +4,7 @@ import datacube
 import requests
 import xarray
 import pandas as pd
+import geopy.distance
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,redirect
@@ -235,32 +236,40 @@ def getIndices(request):
 
 @login_required
 def getElevations(request):
+	SAMPLES = 3601 
 	if request.method == 'POST':
 		print('request for terrain profile')
 		reqObj = json.loads( request.body.decode('utf-8') )
 		latLngs = reqObj['latLngArray']
-		queryParams = ''
-		for i in latLngs:
-			queryParams+=','
-			queryParams+=str(i['lat'])
-			queryParams+=','
-			queryParams+=str(i['lng'])
-		queryParams = queryParams[1:]
-		print(queryParams)
-		query = ('http://open.mapquestapi.com/elevation/v1/profile?key=xxJeGzM0qOcSKmEVmjPI0N09bPpiASzD&shapeFormat=raw&latLngCollection='+str(queryParams))
-		print(query)
-		r = requests.get(query)
-		print('-----------------------------------------------------------------------------')
-		elevationAPIOutput = json.loads(r.content)
-		print(elevationAPIOutput)
-		print('-----------------------------------------------------------------------------')
-		res = {}
-		if(elevationAPIOutput['info']['statuscode'] == 0):
-			res['elevationProfile'] = elevationAPIOutput['elevationProfile']
+		hgt_file = 'N29E079.hgt'
+		elevArr = []
+		prevlat = 0
+		prevlng = 0
+		with open(hgt_file, 'rb') as hgt_data:
+		# Each data is 16bit signed integer(i2) - big endian(>)
+			elevations = np.fromfile(hgt_data, np.dtype('>i2'), SAMPLES*SAMPLES).reshape((SAMPLES, SAMPLES))
+			for i in latLngs:
+				lat = i['lat']
+				lon = i['lng']
+				lat_row = int(round((lat - int(lat)) * (SAMPLES - 1), 0))
+				lon_row = int(round((lon - int(lon)) * (SAMPLES - 1), 0))
+				ans =  elevations[SAMPLES - 1 - lat_row, lon_row].astype(int)
+
+				coords1 = (prevlat,prevlng)
+				coords2 = (lat,lon)
+				dist = 0
+				if(prevlat == 0 and prevlng == 0):
+					print('huh initial one')
+					dist = 0
+				else:
+					dist = geopy.distance.vincenty(coords1,coords2).km
+				elevArr.append({'elevation':int(ans),'distance':dist})
+				print(ans)
+				print(dist)
+				prevlat = i['lat']
+				prevlng = i['lng']
+			res = {}
 			res['error'] = 'no error'
-			print(res)
-			return JsonResponse(res)
-		else:	
-			res['error'] = 'error in processing'
+			res['elevationProfile'] = elevArr
 			return JsonResponse(res)
 
