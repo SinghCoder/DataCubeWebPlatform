@@ -20,6 +20,7 @@
         <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
         <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
         <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             function CheckIndex(val){
                 console.log(val);
@@ -48,55 +49,77 @@
                     x: []
                 }], {
                 margin: { t: 0 } } );
+                // document.getElementsByClassName('svg-container')[0].classList.toggle('hide');
+            }
+            function loaded(){
+              populateIndices();
+              var element = document.getElementById('showGraphLink');
+              element.click();
+              sendRequest("/myapp/loadCube/","GET")
+	            .then(function (response) {
+                console.log('cube loaded');
+              }).catch(function(e){
+                  console.log('error');
+              });
             }
             function closeIndexDiv(){
                 document.getElementById('indexInputField').style.display = 'none';
                 $('select.indexSelect').val('NDVI');
             }
+            function toggleDivClass(){
+              console.log('ji');
+              var element = document.getElementById('tester');                    
+              if(element.style.display != 'none')
+                element.style.display = 'none';
+              else
+                element.style.display = 'block';
+              return false;
+            }
         </script>
     </head>
-    <body onload='populateIndices();'>
+    <body onload='loaded();'>
         <div class='overlay'></div>
         <div id='logoDiv'>
             <a href='/myapp/home/'><img src="{% static '/images/isroLogo.png' %}" id='logoImg'></a>
         </div>
         <!-- Container to hold the map -->
-        <div>
-            <div id = "map"></div>
-            <div id = "tester"></div>
-            <div id='loader'>
-                <div class="container">
-                    <div class="planet">
-                      <div class="spots">
-                        <div class="spot"></div>
-                        <div class="spot"></div>
-                        <div class="spot"></div>
-                        <span style="font-size: 20px;color:white;">Loading.... Please wait</span>
-                        <div class="spot"></div>
-                        <div class="spot"></div>
-                        <div class="spot"></div>
+        <div id='loader'>
+            <div class="container">
+                <div class="planet">
+                  <div class="spots">
+                    <div class="spot"></div>
+                    <div class="spot"></div>
+                    <div class="spot"></div>
+                    <span style="font-size: 20px;color:white;">Loading.... Please wait</span>
+                    <div class="spot"></div>
+                    <div class="spot"></div>
+                    <div class="spot"></div>
+                  </div>
+                </div>
+                <div class="orbit">
+                  <div class="satelite">
+                    <div class="head"></div>
+                    <div class="body"></div>
+                    <div class="wings">
+                      <div class="wing"></div>
+                      <div class="wing"></div>
+                    </div>
+                    <div class="tail"></div>
+                    <div class="antena">
+                      <div class="waves">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
                       </div>
                     </div>
-                    <div class="orbit">
-                      <div class="satelite">
-                        <div class="head"></div>
-                        <div class="body"></div>
-                        <div class="wings">
-                          <div class="wing"></div>
-                          <div class="wing"></div>
-                        </div>
-                        <div class="tail"></div>
-                        <div class="antena">
-                          <div class="waves">
-                            <div class="wave"></div>
-                            <div class="wave"></div>
-                            <div class="wave"></div>
-                          </div>
-                        </div>
-                    </div>
-                    </div>
-                  </div>
-            </div>
+                </div>
+                </div>
+              </div>
+        </div>
+        <div id="mapNGraphContainer">
+            <a class="slide" href="javascript:void(0)" onclick="toggleDivClass();" id="showGraphLink">Slide Out</a>
+            <div id = "map" class="showDiv"></div>
+            <div id = "tester" class="showDiv"></div>
         </div>
         <div id='logout' style='position: absolute;top:0;left:45vw;'>
             <pre>

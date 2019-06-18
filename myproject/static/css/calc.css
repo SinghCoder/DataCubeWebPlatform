@@ -1,11 +1,11 @@
 * {
-  padding: 0;
-  margin: 5px;
+  /* padding: 0; */
+  /* margin: 5px; */
   text-align: center;
 }
-body {
+/* body {
   background-color:black;
-}
+} */
 .calculator {
   width: 350px;
   height: 320px;

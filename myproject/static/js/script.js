@@ -217,18 +217,29 @@ map.on("pm:drawend", (e) => {
     console.log(currentShapeLatLngs);
     if(document.getElementById("selectIndex").value === "terrainProfile"){
         document.getElementById("loader").style.display="block";
-        sendRequest("/myapp/getElevations/","POST",{"latLngArray":currentShapeLatLngs}).then((e)=>{
-            distElevationArray  = JSON.parse(e).elevationProfile;
-            yArr = [];
+        sendRequest("/myapp/getElevations/","POST",{"latLngArray":currentShapeLatLngs}).then((res)=>{
+            res = JSON.parse(res);
+            if(res['error'] == 'Empty Dataset'){
+                // console.log('oyeeeeeeeeee');
+                document.getElementById("loader").style.display="none";
+                swal("Error", "Data not available for these ranges! Try some other region..", "error");
+                return;
+            }
+            distElevationArray  = res.elevationProfile;
+            y1Arr = [];
+            y2Arr = [];
             xArr = [];
             for(let i of distElevationArray){
                 console.log(i);
                 xArr.push(i.distance);
-                yArr.push(i.elevation);
+                y1Arr.push(i.elevation.srtm);
+                y2Arr.push(i.elevation.aster)
             }
             console.log(xArr);
-            console.log(yArr);
-            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,yArr,'');
+            console.log(y1Arr);
+            console.log(y2Arr);
+            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y1Arr,'srtm',false);
+            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y2Arr,'aster',true);
             // console.log(distElevationArray);
             document.getElementById("loader").style.display="none";
             swal("Success", "Elevation Profile is drawn... Click Slide Out to see the graph", "success");

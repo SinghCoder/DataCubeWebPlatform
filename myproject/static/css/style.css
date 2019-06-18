@@ -15,22 +15,44 @@ body{
     opacity: .5;
 }
 #tester{
-    width: 45vw;
-    height: 60vh;
+    width: 100vw;
+    height: 55vh;
     z-index: 10;
     position: absolute;
     top: 30vh;
-    left: 50vw;
+    left: 0vw;
+    transition: all 1s ease;
+    /* display: 'none'; */
 }
 #map{
-    width: 45vw;
-    height: 60vh;
+    width: 100vw;
+    height: 85vh;
     z-index: 10;
     position: absolute;
-    top: 30vh;
-    left: 2vw;
-    outline: none;
+    top: 6vh;
+    left: 0;
+    transition: all .75s ease;
 }
+    
+.svg-container{
+    transition: all .75s ease;
+}
+
+#mapNGraphContainer{
+    position: absolute;
+    top: 15vh;
+    left: 0;
+}
+
+#mapNGraphContainer>a{
+        text-decoration: none;
+        background: #eee;
+        padding: .5em;
+        margin-bottom: 1em;
+        display: inline-block;
+}
+
+
 #indexDiv{
     top: 0;
     right: 5vw;
@@ -129,3 +151,10 @@ body{
      background-position: 65px 5px;
      text-indent: 15px;  
    }
+
+.show{
+    display: block !important;
+}
+.hide{
+    display: none !important;
+}

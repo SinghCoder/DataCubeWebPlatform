@@ -5,6 +5,7 @@ import requests
 import xarray
 import pandas as pd
 import geopy.distance
+from osgeo import gdal,ogr
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,redirect
@@ -100,41 +101,56 @@ def home(request):
 def login(request):
 	return render(request,'login.html')
 
+dc = 0
+measurements = 0
+products = 0
+
+@login_required
+def loadCube(request):
+	global dc
+	global measurements
+	global products
+	dc = datacube.Datacube()
+	products = ['ls7_level1_usgs', 'ls5_level1_usgs']
+	measurements = set(dc.index.products.get_by_name(products[0]).measurements.keys())
+	for prod in products[1:]:
+		measurements.intersection(dc.index.products.get_by_name(products[0]).measurements.keys())
+	res = {}
+	return JsonResponse(res)
+
 @login_required
 def getUTM(request):
-	 res = {}
-	 if request.method == 'POST':
-			latlng = json.loads( request.body.decode('utf-8') )
-			lat = latlng['lat']
-			lng = latlng['lng']
-			dc = datacube.Datacube()
-			query = {
-				'time': ('1995-01-01', '2219-12-12'),
-				'lat': (lat,lat),
-				'lon': (lng,lng)
-			}
-			products = ['ls7_level1_usgs', 'ls5_level1_usgs']
+	global dc
+	global measurements
+	global products
+	res = {}
+	if request.method == 'POST':
+		latlng = json.loads( request.body.decode('utf-8') )
+		lat = latlng['lat']
+		lng = latlng['lng']
+		query = {
+			'time': ('1995-01-01', '2219-12-12'),
+			'lat': (lat,lat),
+			'lon': (lng,lng)
+		}
 
 			# find similarly named measurements
-			measurements = set(dc.index.products.get_by_name(products[0]).measurements.keys())
-			for prod in products[1:]:
-				measurements.intersection(dc.index.products.get_by_name(products[0]).measurements.keys())
 
-			datasets = []
-			for prod in products:
-				ds = dc.load(product=prod,output_crs="EPSG:3577", resolution=(-15, 15), measurements=measurements, **query)
+		datasets = []
+		notEmptyDataset = 0
+		for prod in products:
+			ds = dc.load(product=prod,output_crs="EPSG:3577", resolution=(-15, 15), measurements=measurements, **query)
+			if (not ds.variables):
+				continue
+			else:
+				notEmptyDataset = 1
+				# print(ds)
 				ds['product'] = ('time', np.repeat(prod, ds.time.size))
 				datasets.append(ds)
-
+		if notEmptyDataset:
 			combined = xarray.concat(datasets, dim='time')
 			ds = combined.sortby('time')  # sort along time dim
-
-
-			# print(ds.isnull())
-			# print(ds.dims)
 			[red,green,blue,nir,swir1,swir2,dates] = [ds.red.values,ds.green.values,ds.blue.values,ds.nir.values,ds.swir1.values,ds.swir2.values,ds.red.time.values]
-			# print([red,green,blue,nir])
-
 			res['message'] = 'Data recieved Successfully'
 			res['error'] = 'No Error'
 			res['red'] = red.tolist()
@@ -147,12 +163,13 @@ def getUTM(request):
 			for d in dates:
 					ts = pd.to_datetime(d)
 					res['time'].append(ts.strftime('%Y-%m-%d'))
-			
-	 else:
-			res['error'] = 'Not recieved a post request'
+		else:
+			res['error'] = 'Empty Dataset'
+	else:
+		res['error'] = 'Not recieved a post request'
 	 
 	#  print(res)
-	 return JsonResponse(res)
+	return JsonResponse(res)
 
 @login_required
 def getIndexFormula(request):    	 
@@ -242,9 +259,30 @@ def getElevations(request):
 		reqObj = json.loads( request.body.decode('utf-8') )
 		latLngs = reqObj['latLngArray']
 		hgt_file = 'N29E079.hgt'
+		aster_file = 'ASTGTM2_N29E079\ASTGTM2_N29E079_dem.tif'
 		elevArr = []
-		prevlat = 0
-		prevlng = 0
+		coords1 = (latLngs[0]['lat'],latLngs[0]['lng'])
+		elevationDataFound = 0
+		
+		latLowerBound = int(hgt_file[1:3])
+		latUpperBound = latLowerBound + 1
+
+		lngLowerBound = int(hgt_file[4:7])
+		lngUpperBound = lngLowerBound + 1
+
+		res = {}
+		for i in latLngs:
+			lat = i['lat']
+			lon = i['lng']
+			if (lat < latLowerBound or lat > latUpperBound or lon < lngLowerBound or lon > lngUpperBound):
+				res['error'] = 'Empty Dataset'
+				return JsonResponse(res)
+
+		src_filename = aster_file
+		src_ds=gdal.Open(src_filename) 
+		gt=src_ds.GetGeoTransform()
+		rb=src_ds.GetRasterBand(1)
+
 		with open(hgt_file, 'rb') as hgt_data:
 		# Each data is 16bit signed integer(i2) - big endian(>)
 			elevations = np.fromfile(hgt_data, np.dtype('>i2'), SAMPLES*SAMPLES).reshape((SAMPLES, SAMPLES))
@@ -253,23 +291,27 @@ def getElevations(request):
 				lon = i['lng']
 				lat_row = int(round((lat - int(lat)) * (SAMPLES - 1), 0))
 				lon_row = int(round((lon - int(lon)) * (SAMPLES - 1), 0))
+				px,py=map2pixel(lon,lat,gt)
+				val = float(rb.ReadAsArray(px,py,1,1))
 				ans =  elevations[SAMPLES - 1 - lat_row, lon_row].astype(int)
 
-				coords1 = (prevlat,prevlng)
 				coords2 = (lat,lon)
-				dist = 0
-				if(prevlat == 0 and prevlng == 0):
-					print('huh initial one')
-					dist = 0
-				else:
-					dist = geopy.distance.vincenty(coords1,coords2).km
-				elevArr.append({'elevation':int(ans),'distance':dist})
+				dist = geopy.distance.vincenty(coords1,coords2).km
+				elevArr.append({'elevation':{'srtm':float(ans),'aster':val},'distance':dist})
 				print(ans)
 				print(dist)
-				prevlat = i['lat']
-				prevlng = i['lng']
-			res = {}
 			res['error'] = 'no error'
 			res['elevationProfile'] = elevArr
-			return JsonResponse(res)
 
+		return JsonResponse(res)
+
+def map2pixel(mx,my,gt):
+	"""
+	Convert from map to pixel coordinates.
+	Only works for geotransforms with no rotation.
+	"""
+
+	px = int((mx - gt[0]) / gt[1]) #x pixel
+	py = int((my - gt[3]) / gt[5]) #y pixel
+
+	return px,py
