@@ -20,6 +20,8 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def index(request):
+	if request.user.is_authenticated:
+		return render(request,'home.html')
 	return render(request,'index.html')
 
 def special(request):

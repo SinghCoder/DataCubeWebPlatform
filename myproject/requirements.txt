@@ -1,0 +1,9 @@
+GDAL==2.4.1
+numpy==1.16.4
+utm==0.4.2
+requests==2.22.0
+xarray==0.12.1
+pandas==0.24.2
+geopy==1.20.0
+Django==2.2.2
+affine==2.2.2
