@@ -9,7 +9,7 @@ from osgeo import gdal,ogr
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,redirect
-from myapp.models import indices,UserProfileInfo
+from myapp.models import *
 
 from myapp.forms import UserForm,UserProfileInfoForm
 from django.contrib.auth import authenticate, login as auth_login, logout
@@ -317,3 +317,32 @@ def map2pixel(mx,my,gt):
 	py = int((my - gt[3]) / gt[5]) #y pixel
 
 	return px,py
+
+def length(fname):
+	with open(fname) as f:
+		for i, l in enumerate(f):
+			pass
+	return i + 1
+
+@login_required
+def getFootprints(request):
+	d = {}
+	arr = []
+	if request.method == 'GET':
+		files = satelliteMetadataFiles.objects.all()
+		for file in files:
+			name = file.filename
+			filePath = str(name)
+			fileLength = length(filePath)
+			i=0
+			with open(filePath) as f:
+				for line in f:
+					i=i+1
+					if(i == fileLength):
+						break
+					(key, val) = line.split(' = ')
+					if(key == '    CORNER_UL_LON_PRODUCT' or key == '    CORNER_UL_LAT_PRODUCT' or key == '    CORNER_UR_LON_PRODUCT' or key == '    CORNER_UR_LAT_PRODUCT' or key == '    CORNER_LL_LON_PRODUCT' or key == '    CORNER_LL_LAT_PRODUCT' or key == '    CORNER_LR_LON_PRODUCT' or key == '    CORNER_LR_LAT_PRODUCT'):
+						print([key,float(val[:len(val)-1])])
+						d[key] = float(val[:len(val)-1])
+			arr.append(d)
+	return JsonResponse({'dict':arr,'error':'false'})

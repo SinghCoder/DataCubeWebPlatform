@@ -16,3 +16,6 @@ class UserProfileInfo(models.Model):
 	indicesList = models.CharField(max_length = 20000,default = "NDVI:((nir-r)/(nir+r))")
 	def __str__(self):
   		return self.user.username
+
+class satelliteMetadataFiles(models.Model):
+	filename = models.CharField(max_length = 100,default="")

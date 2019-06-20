@@ -118,6 +118,7 @@
         </div>
         <div id="mapNGraphContainer">
             <a class="slide" href="javascript:void(0)" onclick="toggleDivClass();" id="showGraphLink">Slide Out</a>
+            <a class="slide" href="javascript:void(0)" onclick="showFootprints();" id="showFootprints">Show Footprints</a>
             <div id = "map" class="showDiv"></div>
             <div id = "tester" class="showDiv"></div>
         </div>
@@ -202,4 +203,53 @@
         </div>
     </body>
     <script src="{% static 'js/script.js' %}"></script>
+    <script>
+      function showFootprints()
+        {
+          footPrintsArr = []
+          sendRequest("/myapp/getFootprints/","GET")
+          .then(function (response) {
+                response = JSON.parse(response);
+                console.log(response);
+                var arr = response.dict;
+                for(let i=0; i<arr.length; i++)
+                {
+                  lon_ul = arr[i]['    CORNER_UL_LON_PRODUCT']
+                  lat_ul = arr[i]['    CORNER_UL_LAT_PRODUCT']
+                  lon_ur = arr[i]['    CORNER_UR_LON_PRODUCT']
+                  lat_ur = arr[i]['    CORNER_UR_LAT_PRODUCT']
+                  lon_lr = arr[i]['    CORNER_LR_LON_PRODUCT']
+                  lat_lr = arr[i]['    CORNER_LR_LAT_PRODUCT']
+                  lon_ll = arr[i]['    CORNER_LL_LON_PRODUCT']
+                  lat_ll = arr[i]['    CORNER_LL_LAT_PRODUCT']
+                  data={
+                          "type": "Feature",
+                          "properties": {},
+                          "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                              [
+                                [lon_ul,lat_ul],//ul
+                                [lon_ur,lat_ur],//ur
+                                [lon_lr,lat_lr], //lr
+                                [lon_ll,lat_ll],//ll
+                                [lon_ul,lat_ul]
+                              ]
+                            ]
+                          }
+                        }
+                    footPrintsArr.push(data);
+                  }
+                  var exteriorStyle = {
+                    "color": 'black',
+                    "weight": 0,
+                    "fillOpacity": 0.01 
+                  };
+              L.geoJSON(footPrintsArr,{style: exteriorStyle}).addTo(map);
+            })        
+          .catch(function (error) {
+            console.log("Something went wrong", error);
+            });
+        }
+    </script>
 </html>

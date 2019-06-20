@@ -12,4 +12,5 @@ urlpatterns = [
      url(r'^user_login/$',views.user_login,name='user_login'),
      url(r'^getElevations/',myapp.views.getElevations, name = 'getElevations'),
      url(r'^loadCube/$',myapp.views.loadCube,name='loadCube'),
+     url(r'^getFootprints/$',myapp.views.getFootprints,name='getFootprints'),
 ]
