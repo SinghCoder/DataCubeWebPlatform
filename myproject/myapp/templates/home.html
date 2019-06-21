@@ -212,6 +212,11 @@
                 response = JSON.parse(response);
                 console.log(response);
                 var arr = response.dict;
+                var exteriorStyle = {
+                    "color": 'black',
+                    "weight": 0,
+                    "fillOpacity": 0.01 
+                  };
                 for(let i=0; i<arr.length; i++)
                 {
                   lon_ul = arr[i]['    CORNER_UL_LON_PRODUCT']
@@ -238,14 +243,8 @@
                             ]
                           }
                         }
-                    footPrintsArr.push(data);
+                    L.geoJSON(data,{style: exteriorStyle}).addTo(map);
                   }
-                  var exteriorStyle = {
-                    "color": 'black',
-                    "weight": 0,
-                    "fillOpacity": 0.01 
-                  };
-              L.geoJSON(footPrintsArr,{style: exteriorStyle}).addTo(map);
             })        
           .catch(function (error) {
             console.log("Something went wrong", error);

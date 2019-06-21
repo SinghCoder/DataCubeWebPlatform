@@ -326,7 +326,6 @@ def length(fname):
 
 @login_required
 def getFootprints(request):
-	d = {}
 	arr = []
 	if request.method == 'GET':
 		files = satelliteMetadataFiles.objects.all()
@@ -336,13 +335,16 @@ def getFootprints(request):
 			fileLength = length(filePath)
 			i=0
 			with open(filePath) as f:
+				d = {}
 				for line in f:
 					i=i+1
 					if(i == fileLength):
 						break
 					(key, val) = line.split(' = ')
 					if(key == '    CORNER_UL_LON_PRODUCT' or key == '    CORNER_UL_LAT_PRODUCT' or key == '    CORNER_UR_LON_PRODUCT' or key == '    CORNER_UR_LAT_PRODUCT' or key == '    CORNER_LL_LON_PRODUCT' or key == '    CORNER_LL_LAT_PRODUCT' or key == '    CORNER_LR_LON_PRODUCT' or key == '    CORNER_LR_LAT_PRODUCT'):
-						print([key,float(val[:len(val)-1])])
 						d[key] = float(val[:len(val)-1])
+					if(key == '    CORNER_UL_LAT_PRODUCT'):
+						print([key,float(val[:len(val)-1])])
 			arr.append(d)
+			# print(arr)
 	return JsonResponse({'dict':arr,'error':'false'})
