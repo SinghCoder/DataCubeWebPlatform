@@ -87,7 +87,11 @@ For third party datasets https://datacube-core.readthedocs.io/en/latest/ops/prep
     python manage.py makemigrations
     python manage.py migrate
     ```
+12. To run project
 
+    ```python
+    python manage.py runserver
+    ```
 
 ## Authors
 
