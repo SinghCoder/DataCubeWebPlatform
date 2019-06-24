@@ -18,6 +18,11 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 
+'''
+*if the user is logged in already, then home page is rendered
+*else directed to login page
+
+'''
 @login_required
 def index(request):
 	if request.user.is_authenticated:
@@ -27,12 +32,25 @@ def index(request):
 def special(request):
 	return HttpResponse("You are logged in !")
 
+'''
+directs to login page, authentication is nullified
+'''
 @login_required
 def user_logout(request):
 	logout(request)
 	return HttpResponseRedirect('/myapp/user_login/')
 
+'''
+Called for registering
 
+*receives request from frontend when user tries to register
+*request has the information to be registered
+*if type of request=POST, saves the user details in the SQLITE3 database
+*else registration page is rendered again
+*
+
+
+'''
 def register(request):
 	registered = False
 	if request.method == 'POST':
@@ -64,7 +82,16 @@ def register(request):
 						  {'user_form':user_form,
 						   'profile_form':profile_form,
 						   'registered':registered})
+'''
+Called for loggin in
+*request has the username and password given in by the user
+This function-
+*after receiving request(POST) for login, authenticates the requesting user's 
+password and username
+*if successful, directed to home page
+*login page rendered again in case the request is not of the type POST
 
+'''
 def user_login(request):
 	if request.method == 'POST':
 		username = request.POST.get('username')
@@ -90,6 +117,10 @@ def user_login(request):
 	else:
 		return render(request, 'login.html', {})
 
+'''
+stores the id of the user logging in and renders home page
+
+'''	
 @login_required
 def home(request):
 	id = request.user.id
@@ -120,6 +151,16 @@ def loadCube(request):
 	res = {}
 	return JsonResponse(res)
 
+
+'''
+
+Called for acquiring band arrays for the clicked lat/long from the framed datacube
+Request has the lat/long of the clicked point
+*on receiving request from frontend after clicking on the map, loads the sent lat,long
+*loads data from the datacube for the acquired lat/long combination in the form of a 3D array--*combined*
+*extracts all the respective bands from this array
+*stores these band arrays in a dictionary which is used as a response to the request
+'''
 @login_required
 def getUTM(request):
 	global dc
@@ -173,6 +214,13 @@ def getUTM(request):
 	#  print(res)
 	return JsonResponse(res)
 
+'''
+This function acquires the indexformula for the requested indexname
+*on receiving the request, first stores the indexname
+*searches the index list of the current user for the above indexname
+*if found, indexformula along with indexname returned as JSONresponse
+
+'''
 @login_required
 def getIndexFormula(request):    	 
 	 res = {}
@@ -202,6 +250,16 @@ def getIndexFormula(request):
 	#  print(res)
 	 return JsonResponse(res)
 
+	
+'''
+Called for saving the customized index for the respective user
+receives request(with index name and formula) for saving the index for that logged in user
+*joins the indexname and indexformula with a ':'
+
+*concatenates the above string to the index list of that user
+*keeps adding the indices with a ' ' between them
+
+'''	
 @login_required
 def saveIndex(request):
 	 res = {}
@@ -229,6 +287,15 @@ def saveIndex(request):
 	 print(res)
 	 return JsonResponse(res)
 
+'''
+Called for getting the custom indexes and formulae of the user
+If the request type is GET-
+*splits the indiceslist of the respective user with ' ' as the delimiter
+*further splits the obtained objects with ':' to separate out indexname and indexformula
+*makes a list of all the indexnames and formulae
+*returns these as dict
+
+'''	
 @login_required
 def getIndices(request):
 	 if request.method == 'GET':
@@ -253,6 +320,14 @@ def getIndices(request):
 	#  print(res)
 	 return JsonResponse(res)
 
+'''
+Called for drawing the terrain profiles
+Request has the array of lat/long covered by the poly-line pointers
+returns an array of elevation at all the above acquired points
+
+
+
+'''	
 @login_required
 def getElevations(request):
 	SAMPLES = 3601 
@@ -317,13 +392,21 @@ def map2pixel(mx,my,gt):
 	py = int((my - gt[3]) / gt[5]) #y pixel
 
 	return px,py
+'''
+returns the number of lines in a file
 
+'''
 def length(fname):
 	with open(fname) as f:
 		for i, l in enumerate(f):
 			pass
 	return i + 1
+'''
+Called for getting the extent of footprints
+*for ech metadata file, splits the file lines with '=' to form key value pairs
+*retruns an array of the acuired lat/long of the 4 corners of each file
 
+'''
 @login_required
 def getFootprints(request):
 	arr = []
