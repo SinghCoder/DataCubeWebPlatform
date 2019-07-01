@@ -1,0 +1,8 @@
+mydocument:
+  '@has': an attribute
+  and:
+  - many: elements
+  - many: more elements
+  plus:
+  - '@a': complex
+  - element as well
