@@ -19,6 +19,7 @@ What things you need to install the software and how to install them
 * [Open Data Cube](https://datacube-core.readthedocs.io/en/latest/) project 
 * Landsat images of the region with corresponding metadata files (in .yaml format)
 
+
 ### Installing
 
 1. Add conda forge channel
@@ -72,9 +73,25 @@ What things you need to install the software and how to install them
 8. Add product definitions (It defines what type of products your datacube can hold.) using `datacube product add <path to your product definition yaml>`
     Examples of some [product definitions](https://github.com/opendatacube/datacube-core/tree/develop/docs/config_samples/dataset_types)
 
-9.For each dataset add it's metadata file. At a minimum, you need the dimensions or fields your want to search by, such as lat, lon and time, but you can include any information you deem useful.
+9.
+#DATA PREPARATION
+The second step in the process is about extracting details from an individual satellite image. This is called the data preparation step. 
+Scripts are available to extract information or metadata from many types of images. (metadata/MTL_MetadataTo_YAML.py, xmlToYaml.py)
+
+The data extracted typically includes date and time of acquisition, spatial bounds, etc. as metadata. 
+
+For each dataset add it's metadata file. At a minimum, you need the dimensions or fields your want to search by, such as lat, lon and time, but you can include any information you deem useful.
 It is typically stored in YAML documents, but JSON is also supported. It is stored in the index for searching, querying and accessing the data.
 For third party datasets https://datacube-core.readthedocs.io/en/latest/ops/prepare_scripts.html#prepare-scripts
+
+In indexing step, metadata (documents) are indexed into the ODC’s database. Most importantly, the
+process stores the location of the data within a local system. 
+
+To index - 
+
+```python
+datacube dataset add <path to metadata.yaml of particular image>
+```
 
 10. Install all the requirements using 
     ```python
@@ -93,6 +110,13 @@ For third party datasets https://datacube-core.readthedocs.io/en/latest/ops/prep
     python manage.py runserver
     ```
 
+###Querying the datacube
+User-supplied query parameters are used as a lookup into the metadata database in order to determine which datasets hold data requested by the user. Those datasets are then grouped and ordered, and the actual data is loaded from the file system.
+The resulting data is organized into an Xarray Dataset with appropriate temporal-spatial dimensions and separate data variables for each band.
+
+![Querying Process](./query.png?raw=true "Querying the datacube")
+
+
 ## Authors
 
 * **Harpinder Jot Singh** - [Github](https://github.com/HarpinderJotSingh) [LinkedIn](https://in.linkedin.com/in/harpinder-jot-singh-248b92155)
@@ -105,3 +129,12 @@ For third party datasets https://datacube-core.readthedocs.io/en/latest/ops/prep
 * StackOverflow :P
 
 
+## Acronyms
+- ARD                 Analysis Ready Data
+- EO                  Earth Observation
+- DB                  Database
+- GDAL                Geospatial Data Abstraction Library
+- GIS                 Geographic Information System
+- NetCDF              Network Common Data Form
+- ODC                 Open Data Cube
+- USGS                United States Geological Survey
