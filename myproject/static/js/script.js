@@ -165,94 +165,6 @@ function latlonToBackend(latlng){
     });
 }
 
-
-// initialize the map 
-let map = L.map("map").setView([29.380304, 79.463570],10);
-let MyBingMapsKey = "ApDp98sLLH6Lggj-ExrPosLg8IDo0exkQYMu6qU41XgOMheh1NDWyd1HHzyVbny9";
-let bingLayer = L.bingLayer(MyBingMapsKey);
-let osmLayer = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
-
-let baseLayers = {
-    "bingLayer":bingLayer,
-    "osmLayer":osmLayer
-};
-L.control.layers(baseLayers).addTo(map);
-
-let searchControl = new L.esri.Controls.Geosearch().addTo(map);
-
-let results = new L.LayerGroup().addTo(map);
-
-searchControl.on("results", function(data){
-    results.clearLayers();
-    for (let i = data.results.length - 1; i >= 0; i--) {
-      results.addLayer(L.marker(data.results[i].latlng));
-    }
-});
-
-
-map.pm.addControls({
-    position: "topleft",
-    drawCircle: false,
-  });
-
-map.on("click", function(e){
- let coord = e.latlng;
- let lat = coord.lat;
- let lng = coord.lng;
- console.log("You clicked the map at latitude: " + lat + " and longitude: " + lng);
- if(document.getElementById("selectIndex").value != "terrainProfile"){
-     document.getElementById("loader").style.display = "block";
-    latlonToBackend(coord);
- }
-}); 
-
-currentShapeLatLngs = [];
-
-// listen to vertexes being added to currently drawn layer (called workingLayer)
-map.on("pm:drawstart", ({ workingLayer }) => {
-    currentShapeLatLngs = workingLayer._latlngs;
-});
-
-map.on("pm:drawend", (e) => {
-    console.log(currentShapeLatLngs);
-    if(document.getElementById("selectIndex").value === "terrainProfile"){
-        document.getElementById("loader").style.display="block";
-        sendRequest("/myapp/getElevations/","POST",{"latLngArray":currentShapeLatLngs}).then((res)=>{
-            res = JSON.parse(res);
-            if(res['error'] == 'Empty Dataset'){
-                // console.log('oyeeeeeeeeee');
-                document.getElementById("loader").style.display="none";
-                swal("Error", "Data not available for these ranges! Try some other region..", "error");
-                return;
-            }
-            distElevationArray  = res.elevationProfile;
-            y1Arr = [];
-            y2Arr = [];
-            xArr = [];
-            for(let i of distElevationArray){
-                console.log(i);
-                xArr.push(i.distance);
-                y1Arr.push(i.elevation.srtm);
-                y2Arr.push(i.elevation.aster)
-            }
-            console.log(xArr);
-            console.log(y1Arr);
-            console.log(y2Arr);
-            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y1Arr,'srtm',false);
-            plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y2Arr,'aster',true);
-            // console.log(distElevationArray);
-            document.getElementById("loader").style.display="none";
-            swal("Success", "Elevation Profile is drawn... Click Slide Out to see the graph", "success");
-        }).catch(
-            (e)=>{
-                console.log("Error ",e);
-                alert("Some Error occured... Please try again in a while");
-                document.getElementById("loader").style.display="none";
-            }
-        );
-    }
-});
-
 /**
  * This function takes input pixel values time series data for all years corresponding to that location and 
  * process the indexFormula corresponding to selected Index using Math.js math.compile()
@@ -362,6 +274,7 @@ function getIndices(){
                                .text(value.name+" : "+value.formula)); 
            });
            $("#selectIndex").append("<option value='terrainProfile'>Draw Terrain Profile</option>");
+           $("#selectIndex").append("<option value='visualisations'>Visualise</option>");
            $("#selectIndex").append("<option value='other'>Add your own index</option>");
            document.getElementById("indexInputField").style.display = "none";
            document.getElementById("map").style.display = "block";
@@ -374,3 +287,168 @@ function getIndices(){
     );
 }
 
+function initializeLeaflet()
+{
+    // initialize the map 
+        let map = L.map("map").setView([39.8, -98.5], 6);
+        let CDB_URL = 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+        let thirdLayer = new L.tileLayer(CDB_URL);
+        let MyBingMapsKey = "ApDp98sLLH6Lggj-ExrPosLg8IDo0exkQYMu6qU41XgOMheh1NDWyd1HHzyVbny9";
+        let bingLayer = L.bingLayer(MyBingMapsKey);
+        let osmLayer = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+
+        let baseLayers = {
+            "bingLayer":bingLayer,
+            "osmLayer":osmLayer,
+            "thirdLayer" : thirdLayer
+        };
+        L.control.layers(baseLayers).addTo(map);
+
+        let searchControl = new L.esri.Controls.Geosearch().addTo(map);
+
+        map.pm.addControls({
+            position: "topleft",
+            drawCircle: false,
+        });
+
+        map.on("click", function(e){
+        let coord = e.latlng;
+        let lat = coord.lat;
+        let lng = coord.lng;
+        console.log("You clicked the map at latitude: " + lat + " and longitude: " + lng);
+        if((document.getElementById("selectIndex").value != "terrainProfile") && (document.getElementById("selectIndex").value !== "visualisations") ){
+            document.getElementById("loader").style.display = "block";
+            latlonToBackend(coord);
+        }
+        }); 
+
+        currentShapeLatLngs = [];
+
+        // listen to vertexes being added to currently drawn layer (called workingLayer)
+        map.on("pm:drawstart", ({ workingLayer }) => {
+            currentShapeLatLngs = workingLayer._latlngs;
+        });
+
+        map.on("pm:drawend", (e) => {
+            console.log(currentShapeLatLngs);
+            if(document.getElementById("selectIndex").value === "terrainProfile"){
+                document.getElementById("loader").style.display="block";
+                sendRequest("/myapp/getElevations/","POST",{"latLngArray":currentShapeLatLngs}).then((res)=>{
+                    res = JSON.parse(res);
+                    if(res['error'] == 'Empty Dataset'){
+                        // console.log('oyeeeeeeeeee');
+                        document.getElementById("loader").style.display="none";
+                        swal("Error", "Data not available for these ranges! Try some other region..", "error");
+                        return;
+                    }
+                    distElevationArray  = res.elevationProfile;
+                    y1Arr = [];
+                    y2Arr = [];
+                    xArr = [];
+                    for(let i of distElevationArray){
+                        console.log(i);
+                        xArr.push(i.distance);
+                        y1Arr.push(i.elevation.srtm);
+                        y2Arr.push(i.elevation.aster)
+                    }
+                    console.log(xArr);
+                    console.log(y1Arr);
+                    console.log(y2Arr);
+                    plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y1Arr,'srtm',false);
+                    plotGraph('Elevation Profile','Distance (in Kms)','Height(in meters)',xArr,y2Arr,'aster',true);
+                    // console.log(distElevationArray);
+                    document.getElementById("loader").style.display="none";
+                    swal("Success", "Elevation Profile is drawn... Click Slide Out to see the graph", "success");
+                }).catch(
+                    (e)=>{
+                        console.log("Error ",e);
+                        alert("Some Error occured... Please try again in a while");
+                        document.getElementById("loader").style.display="none";
+                    }
+                );
+            }
+        });
+
+                /////////////////////////////////////////////////////////////////////////////////////////////
+                                //adding data from WMS//
+                /////////////////////////////////////////////////////////////////////////////////////////////
+
+                // the time property specified here is used to label the slider
+                var radTime = new Date();
+                var radar_current = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });   
+
+                radTime.setMinutes(radTime.getMinutes() - 10);
+                var radar_10min = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913-m10m',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });
+
+                radTime.setMinutes(radTime.getMinutes() - 10);
+                var radar_20min = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913-m20m',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });
+
+                radTime.setMinutes(radTime.getMinutes() - 10);
+                var radar_30min = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913-m30m',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });
+
+                radTime.setMinutes(radTime.getMinutes() - 10);
+                var radar_40min = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913-m40m',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });
+
+                radTime.setMinutes(radTime.getMinutes() - 10);
+                var radar_50min = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q.cgi", {
+                    layers: 'nexrad-n0q-900913-m50m',
+                    format: 'image/png',
+                    transparent: true,
+                    attribution: "Weather data © 2016 IEM Nexrad",
+                    time: radTime.toLocaleString()
+                });
+
+                /////////////////////////////////////////////////////////////////////////////////////////////
+                //creating slider control//
+                /////////////////////////////////////////////////////////////////////////////////////////////
+
+                var radLayers = [radar_50min, radar_40min, radar_30min, radar_20min, radar_10min, radar_current];
+                let radlayerGroup = L.featureGroup(radLayers);
+                var sliderControl = L.control.sliderControl({
+                    layer: radlayerGroup,
+                    follow: true
+                });
+                radlayerGroup.bringToFront();
+                // sliderControl.on('click',function(){
+                //     console.log('yayy');
+                // });
+                map.addControl(sliderControl);
+                // map.removeControl(sliderControl);
+                sliderControl.startSlider();
+                // sliderControl.stopSlider();
+
+                map.on('layeradd', onLayerAdd);
+                function onLayerAdd(e){
+                    radlayerGroup.bringToFront();
+                }
+}

@@ -134,24 +134,6 @@ def home(request):
 def login(request):
 	return render(request,'login.html')
 
-dc = 0
-measurements = 0
-products = 0
-
-@login_required
-def loadCube(request):
-	global dc
-	global measurements
-	global products
-	dc = datacube.Datacube()
-	products = ['ls7_level1_usgs', 'ls5_level1_usgs']
-	measurements = set(dc.index.products.get_by_name(products[0]).measurements.keys())
-	for prod in products[1:]:
-		measurements.intersection(dc.index.products.get_by_name(products[0]).measurements.keys())
-	res = {}
-	return JsonResponse(res)
-
-
 '''
 
 Called for acquiring band arrays for the clicked lat/long from the framed datacube
@@ -163,9 +145,13 @@ Request has the lat/long of the clicked point
 '''
 @login_required
 def getUTM(request):
-	global dc
-	global measurements
-	global products
+    
+	dc = datacube.Datacube()
+	products = ['ls7_level1_usgs', 'ls5_level1_usgs']
+	measurements = set(dc.index.products.get_by_name(products[0]).measurements.keys())
+	for prod in products[1:]:
+		measurements.intersection(dc.index.products.get_by_name(products[0]).measurements.keys())
+
 	res = {}
 	if request.method == 'POST':
 		latlng = json.loads( request.body.decode('utf-8') )
@@ -324,10 +310,8 @@ def getIndices(request):
 Called for drawing the terrain profiles
 Request has the array of lat/long covered by the poly-line pointers
 returns an array of elevation at all the above acquired points
-
-
-
 '''	
+
 @login_required
 def getElevations(request):
 	SAMPLES = 3601 
@@ -347,6 +331,7 @@ def getElevations(request):
 		lngLowerBound = int(hgt_file[4:7])
 		lngUpperBound = lngLowerBound + 1
 
+		print([latLowerBound,latUpperBound,lngLowerBound,lngUpperBound])
 		res = {}
 		for i in latLngs:
 			lat = i['lat']

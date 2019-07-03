@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="{% static '/css/loader.css' %}"/>
         <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
         <link rel="stylesheet" type="text/css" href="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.css">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" type="text/css">
         <script src="{% static '/leaflet/leaflet.js' %}"></script>
         <script src="{% static 'js/calc.js' %}"></script>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -17,10 +17,12 @@
         <!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise"></script> -->
         <!-- <script src="{% static 'js/leaflet-bing-layer.min.js' %}"></script> -->
         <script src="{% static 'js/Bing.js' %}"></script>
-        <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
         <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
         <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+        <script src="{% static 'js/SliderControl.js' %}"></script>
         <script>
             function CheckIndex(val){
                 console.log(val);
@@ -53,14 +55,9 @@
             }
             function loaded(){
               populateIndices();
+              initializeLeaflet();
               var element = document.getElementById('showGraphLink');
               element.click();
-              sendRequest("/myapp/loadCube/","GET")
-	            .then(function (response) {
-                console.log('cube loaded');
-              }).catch(function(e){
-                  console.log('error');
-              });
             }
             function closeIndexDiv(){
                 document.getElementById('indexInputField').style.display = 'none';
