@@ -1,4 +1,13 @@
-function addChar(input, character) {
+//================================================== changes ======================================================
+function clearCalcScreen()
+{
+    document.getElementById('display').value='';
+}
+//================================================== changes ======================================================
+function addChar(character) { //================================================== changes ======================================================
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
+	//================================================== changes ======================================================
 	if(input.value == null || input.value == "enter")
 		input.value = character
 	else{
@@ -9,53 +18,70 @@ function addChar(input, character) {
 	}
 }
 
-function deleteChar(input) {
+function deleteChar() {//================================================== changes ======================================================
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
+	//================================================== changes ======================================================
 	input.value = input.value.substring(0, input.value.length - 1)
 }
 
-function cos(input) {
+function cos() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='cos('
 	else 
 	    input.value =input.value +'cos('
 }
 
-function sin(input) {
+function sin() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='sin('
 	else 
 	    input.value =input.value +'sin('
 }
 
-function tan(input) {
+function tan() {
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='tan('
 	else 
 	    input.value =input.value +'tan('
 }
 
-function sqrt(input) {
+function sqrt() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='sqrt('
 	else 
 	   input.value =input.value +'sqrt('
 }
 
-function log(input) {
+function log() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='log('
 	else 
 	    input.value =input.value +'log('
 }
 
-function exp(input) {
+function exp() {
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='exp('
 	else 
 	    input.value =input.value +'exp('
 }
 
-function power(input) {
+function power() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='pow('
 	else 
@@ -64,28 +90,37 @@ function power(input) {
 
 
 
-function pi(input){
+function pi() {
+	//================================================== changes ======================================================	
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='PI'
 	else 
 	    input.value =input.value +'PI'}
 
 
-function ceil(input){
+function ceil() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='ceil('
 	else 
 	    input.value =input.value +'ceil('}
 
-function floor(input){
+function floor() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
 	if(input.value=="enter")
 		input.value='floor('
 	else 
 	   input.value =input.value +'floor('}
 
 
-function percent(input){
-	input.value=input.value + '%(';}
+function percent() { 
+	//================================================== changes ======================================================
+	let input = document.getElementById('display');
+	input.value=input.value + '%(';
+}
 
 
 

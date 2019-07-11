@@ -7,21 +7,28 @@
         <link rel="stylesheet" href="{% static '/css/calc.css' %}"/>
         <link rel="stylesheet" href="{% static '/css/loader.css' %}"/>
         <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
-        <link rel="stylesheet" type="text/css" href="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.css">
+        <!-- changes -->
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet-geocoder/2.2.14/esri-leaflet-geocoder.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" type="text/css">
-        <script src="{% static '/leaflet/leaflet.js' %}"></script>
+        <!-- <script src="{% static '/leaflet/leaflet.js' %}"></script> -->
+        <!-- changes -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet-src.js"></script>
         <script src="{% static 'js/calc.js' %}"></script>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/mathjs/5.10.3/math.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.10.3/math.js'></script>
         <script src="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.min.js"></script>
         <!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise"></script> -->
         <!-- <script src="{% static 'js/leaflet-bing-layer.min.js' %}"></script> -->
         <script src="{% static 'js/Bing.js' %}"></script>
-        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-        <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
-        <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
+        <!-- <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script> -->
+        <!-- changes -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>	
+        <!-- changes -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet/2.2.4/esri-leaflet.js"></script>
+        <!-- changes -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet-geocoder/2.2.14/esri-leaflet-geocoder.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-        <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
         <script src="{% static 'js/SliderControl.js' %}"></script>
         <script>
             function CheckIndex(val){
@@ -36,7 +43,8 @@
                     element.style.display='none';
                 
             }
-            function submitIndex(text){
+            function submitIndex(){
+                let text = document.getElementById('display').value;
                 console.log(text);
                 indexName = document.getElementById('indexNameInput').value;
                 indexFormula = text;
@@ -142,55 +150,57 @@
                 
                 
                    <tr>
-                     <td><input type="button" class="btnTop" name="btnTop" value="CLR" onclick="this.form.display.value=  '' "></td>
-                     <td><input type="button" class="btnTop" name="btnTop" value="DEL" onclick="deleteChar(this.form.display)"></td>
-                   <td><input type="button" class="btnTop" name="btnTop" value="GO" onclick="submitIndex(this.form.display.value)">
+                     <!-- changes -->
+                     <td><input type="button" class="btnTop" name="btnTop" value="CLR" onclick="clearCalcScreen();"></td>
+                     <td><input type="button" class="btnTop" name="btnTop" value="DEL" onclick="deleteChar()"></td>
+                   <td><input type="button" class="btnTop" name="btnTop" value="GO" onclick="submitIndex()">
                      </td>
                    </tr>
                 
                 
                    <tr>
-                     <td><input type="button" class="btnCol" name="btnCol" value="BLUE" onclick="addChar(this.form.display, 'b')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="GRN" onclick="addChar(this.form.display, 'g')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR1" onclick="addChar(this.form.display, 'swir1')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR2" onclick="addChar(this.form.display, 'swir2')"></td>
-                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="ceil" onclick=" ceil(this.form.display) "></td>
+                     
+                     <td><input type="button" class="btnCol" name="btnCol" value="BLUE" onclick="addChar('b')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="GRN" onclick="addChar('g')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR1" onclick="addChar('swir1')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="SWIR2" onclick="addChar('swir2')"></td>
+                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="ceil" onclick=" ceil() "></td>
                    </tr>
                 
                    <tr>
-                     <td><input type="button" class="btnCol" name="btnCol" value="NIR" onclick="addChar(this.form.display, 'nir')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="RED" onclick="addChar(this.form.display, 'r')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar(this.form.display, 'any')"></td>
-                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar(this.form.display, 'any')"></td>
-                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="floor" onclick=" floor(this.form.display) "></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="NIR" onclick="addChar('nir')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="RED" onclick="addChar('r')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar('any')"></td>
+                     <td><input type="button" class="btnCol" name="btnCol" value="ANY" onclick="addChar('any')"></td>
+                      <td><input type="button" class="btnMathl0" name="btnMathl0" value="floor" onclick=" floor() "></td>
                    </tr>
                 
                    <tr>
-                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="e&#94;" onclick=" exp(this.form.display) "></td>
-                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="/" onclick="addChar(this.form.display, '/')"></td>
-                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="%" onclick=" percent(this.form.display)"></td>
-                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="log" onclick=" log(this.form.display) "></td>
-                     <td><input type="button" class="btnMathl1" name="btnMathl1" value="*" onclick="addChar(this.form.display, '*')"></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="e&#94;" onclick=" exp() "></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="/" onclick="addChar('/')"></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="%" onclick=" percent()"></td>
+                    <td><input type="button" class="btnMathl1" name="btnMathl1" value="log" onclick=" log() "></td>
+                     <td><input type="button" class="btnMathl1" name="btnMathl1" value="*" onclick="addChar('*')"></td>
                    </tr>
                 
                 
                    <tr>
                      
-                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="&radic;" onclick="sqrt(this.form.display) "></td>
-                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="-" onclick="addChar(this.form.display, '-')"></td>
-                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="+" onclick="addChar(this.form.display, '+')"></td>
-                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="x&#94;" onclick=" power(this.form,display) "></td>
-                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="PI" onclick=" pi(this.form.display) "></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="&radic;" onclick="sqrt() "></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="-" onclick="addChar('-')"></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="+" onclick="addChar('+')"></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="x&#94;" onclick=" power() "></td>
+                   <td><input type="button" class="btnMathl2" name="btnMathl2" value="PI" onclick=" pi() "></td>
                    </tr>
                 
                 
                    
                    <tr>
-                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="(" onclick="addChar(this.form.display, '(')"></td>
-                     <td><input type="button" class="btnMathl3" name="btnMathl3" value=")" onclick="addChar(this.form.display,')')"></td>
-                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="cos" onclick=" cos(this.form.display) "></td>
-                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="sin" onclick=" sin(this.form.display) "></td>
-                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="tan" onclick=" tan(this.form.display) "></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="(" onclick="addChar('(')"></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value=")" onclick="addChar(')')"></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="cos" onclick=" cos() "></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="sin" onclick=" sin() "></td>
+                     <td><input type="button" class="btnMathl3" name="btnMathl3" value="tan" onclick=" tan() "></td>
                   </tr>
                 
                 
@@ -201,51 +211,6 @@
     </body>
     <script src="{% static 'js/script.js' %}"></script>
     <script>
-      function showFootprints()
-        {
-          footPrintsArr = []
-          sendRequest("/myapp/getFootprints/","GET")
-          .then(function (response) {
-                response = JSON.parse(response);
-                console.log(response);
-                var arr = response.dict;
-                var exteriorStyle = {
-                    "color": 'black',
-                    "weight": 0,
-                    "fillOpacity": 0.01 
-                  };
-                for(let i=0; i<arr.length; i++)
-                {
-                  lon_ul = arr[i]['    CORNER_UL_LON_PRODUCT']
-                  lat_ul = arr[i]['    CORNER_UL_LAT_PRODUCT']
-                  lon_ur = arr[i]['    CORNER_UR_LON_PRODUCT']
-                  lat_ur = arr[i]['    CORNER_UR_LAT_PRODUCT']
-                  lon_lr = arr[i]['    CORNER_LR_LON_PRODUCT']
-                  lat_lr = arr[i]['    CORNER_LR_LAT_PRODUCT']
-                  lon_ll = arr[i]['    CORNER_LL_LON_PRODUCT']
-                  lat_ll = arr[i]['    CORNER_LL_LAT_PRODUCT']
-                  data={
-                          "type": "Feature",
-                          "properties": {},
-                          "geometry": {
-                            "type": "Polygon",
-                            "coordinates": [
-                              [
-                                [lon_ul,lat_ul],//ul
-                                [lon_ur,lat_ur],//ur
-                                [lon_lr,lat_lr], //lr
-                                [lon_ll,lat_ll],//ll
-                                [lon_ul,lat_ul]
-                              ]
-                            ]
-                          }
-                        }
-                    L.geoJSON(data,{style: exteriorStyle}).addTo(map);
-                  }
-            })        
-          .catch(function (error) {
-            console.log("Something went wrong", error);
-            });
-        }
+      
     </script>
 </html>

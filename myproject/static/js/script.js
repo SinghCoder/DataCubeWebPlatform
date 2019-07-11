@@ -1,3 +1,7 @@
+//================================================== changes ======================================================
+let map = L.map("map").setView([39.8, -98.5], 6);
+//================================================== changes ======================================================
+
 /*jshint esversion: 6 */
 /**
  * This function is used to get cookie so that csrf token can be set while sending request to backend
@@ -290,7 +294,7 @@ function getIndices(){
 function initializeLeaflet()
 {
     // initialize the map 
-        let map = L.map("map").setView([39.8, -98.5], 6);
+        
         let CDB_URL = 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
         let thirdLayer = new L.tileLayer(CDB_URL);
         let MyBingMapsKey = "ApDp98sLLH6Lggj-ExrPosLg8IDo0exkQYMu6qU41XgOMheh1NDWyd1HHzyVbny9";
@@ -304,7 +308,7 @@ function initializeLeaflet()
         };
         L.control.layers(baseLayers).addTo(map);
 
-        let searchControl = new L.esri.Controls.Geosearch().addTo(map);
+        // let searchControl = new L.esri.Controls.Geosearch().addTo(map);
 
         map.pm.addControls({
             position: "topleft",
@@ -452,3 +456,56 @@ function initializeLeaflet()
                     radlayerGroup.bringToFront();
                 }
 }
+
+
+//================================================== changes ======================================================
+
+function showFootprints()
+{
+    footPrintsArr = []
+    sendRequest("/myapp/getFootprints/","GET")
+        .then(function (response) {
+                response = JSON.parse(response);
+                console.log(response);
+                var arr = response.dict;
+                var exteriorStyle = {
+                    "color": 'black',
+                    "weight": 0,
+                    "fillOpacity": 0.05
+                  };
+                for(let i=0; i<arr.length; i++)
+                {
+                  lon_ul = arr[i]['    CORNER_UL_LON_PRODUCT']
+                  lat_ul = arr[i]['    CORNER_UL_LAT_PRODUCT']
+                  lon_ur = arr[i]['    CORNER_UR_LON_PRODUCT']
+                  lat_ur = arr[i]['    CORNER_UR_LAT_PRODUCT']
+                  lon_lr = arr[i]['    CORNER_LR_LON_PRODUCT']
+                  lat_lr = arr[i]['    CORNER_LR_LAT_PRODUCT']
+                  lon_ll = arr[i]['    CORNER_LL_LON_PRODUCT']
+                  lat_ll = arr[i]['    CORNER_LL_LAT_PRODUCT']
+                  data={
+                          "type": "Feature",
+                          "properties": {},
+                          "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                              [
+                                [lon_ul,lat_ul],//ul
+                                [lon_ur,lat_ur],//ur
+                                [lon_lr,lat_lr], //lr
+                                [lon_ll,lat_ll],//ll
+                                [lon_ul,lat_ul]
+                              ]
+                            ]
+                          }
+                    }
+                    L.geoJSON(data,{style:exteriorStyle}).addTo(map);
+                  }
+            })        
+          .catch(function (error) {
+            console.log("Something went wrong", error);
+    });
+}
+
+//================================================== changes ======================================================
+
