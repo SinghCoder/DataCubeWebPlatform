@@ -144,6 +144,7 @@ The resulting data is organized into an Xarray Dataset with appropriate temporal
 
 
 ## Acronyms
+
 - ARD                 Analysis Ready Data
 - EO                  Earth Observation
 - DB                  Database
@@ -152,3 +153,11 @@ The resulting data is organized into an Xarray Dataset with appropriate temporal
 - NetCDF              Network Common Data Form
 - ODC                 Open Data Cube
 - USGS                United States Geological Survey
+
+## Commit History Visualizer
+
+![GIF](CommitHistoryVisualizer/DataCubeWebPlatform.gif)
+
+[video](CommitHistoryVisualizer/DataCubeWebPlatform.mp4)
+
+- Above video is made using ![Visual Source](https://img.shields.io/badge/visual-source-orange)
