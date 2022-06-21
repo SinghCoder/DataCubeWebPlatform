@@ -1,5 +1,5 @@
 GDAL==2.4.1
-numpy==1.16.4
+numpy==1.22.0
 utm==0.4.2
 requests==2.22.0
 xarray==0.12.1
